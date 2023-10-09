@@ -1,6 +1,6 @@
 ﻿# Who Am I : GPC
 
-This is the GPC version of Who Am I.  It uses Google Cloud Run to build a microservice with Flask and Gunicorn that provides an API for querying information in a Snowflake Database.  The information is displayed with interactive Vega-Lite visualizations.
+This is the GCP version of "Who Am I." It leverages Google Cloud Run to construct a microservice using Flask and Gunicorn, offering an API for querying a Snowflake Database. In contrast, the alternate versions of "Who Am I" rely on cloud providers that do not utilize containers. The key distinction lies in Google Functions overseeing the primary Flask application, which can make managing multiple paths somewhat intricate but still [achievable](https://medium.com/google-cloud/use-multiple-paths-in-cloud-functions-python-and-flask-fc6780e560d3). The data is presented using interactive Vega-Lite visualizations.
 
 ## Continuous Deployment
 
