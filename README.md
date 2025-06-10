@@ -1,87 +1,301 @@
-# Snowflake Flask App - Google Cloud Platform Deployment
+# Snowflake Flask App - Google Cloud Run Deployment
 
-This repository contains a Flask application that displays database information from a Snowflake database, deployed on Google Cloud Run.
+A containerized Flask application deployed on Google Cloud Run, featuring interactive Three.js visualizations and real-time Snowflake database connectivity with automatic scaling and global edge distribution.
 
-## Enhanced Visualizations
+## 🚀 Live Application
+**URL**: https://snow-flask-whoami-gpc-k6cy6vf2la-uc.a.run.app/
 
-### Homepage (/)
-The homepage features a dual-layer visualization:
-1. **Vega-Lite Chart**: A bar chart showing name counts from the Snowflake database
-2. **Three.js Background Animation**: A dynamic background with falling data sprites representing database entries. The animation creates a sense of data flow and adds visual interest to the page.
+## ✨ Features
 
-### HardData Page (/HardData)
-The HardData page has been completely overhauled with an interactive 3D visualization:
-1. **Interactive 3D Cards**: Each database record is represented as a 3D card in a Three.js scene
-2. **Drag Controls**: Users can click and drag cards to rearrange them in 3D space
-3. **Orbit Controls**: Users can rotate and zoom the camera to explore the data from different angles
+### Interactive Visualizations
+- **Homepage (`/`)**: Dual-layer visualization combining:
+  - Vega-Lite bar chart showing real-time name counts from Snowflake database
+  - Three.js background animation with falling data sprites creating dynamic visual data flow
+- **HardData Page (`/HardData`)**: Immersive 3D data exploration:
+  - Interactive 3D cards representing individual database records
+  - Drag controls for spatial manipulation and rearrangement of data elements
+  - Orbital camera controls for comprehensive 360° data exploration
 
-## Deployment
+### Technical Architecture
+- **Compute**: Google Cloud Run (fully managed containerized platform)
+- **Container**: Docker-based deployment with automatic scaling
+- **Authentication**: RSA key-pair authentication with Snowflake
+- **CI/CD**: Cloud Build with automated deployment pipeline
 
-This application is deployed on Google Cloud Platform using:
-- **Cloud Run**: Fully managed container platform
-- **Cloud Build**: CI/CD platform for building and deploying containers
-- **Container Registry**: Storage for Docker container images
+## 🏗️ Google Cloud Infrastructure
 
-### Prerequisites
-- Google Cloud SDK
-- Docker
-- Python 3.9+
-- Snowflake account with proper credentials
+### Services Used
+| Service | Purpose | Configuration |
+|---------|---------|---------------|
+| **Cloud Run** | Containerized compute | Fully managed, auto-scaling |
+| **Cloud Build** | CI/CD pipeline | Automated builds and deployments |
+| **Container Registry** | Image storage | Private container repository |
+| **Cloud Logging** | Application logs | Centralized logging and monitoring |
 
-### Deployment Steps
-1. Configure your GCP credentials:
-   ```
-   gcloud auth login
-   ```
+## 📋 Prerequisites
 
-2. Set your project:
-   ```
-   gcloud config set project YOUR_PROJECT_ID
-   ```
+- **Google Cloud SDK** (gcloud CLI) - [Installation Guide](https://cloud.google.com/sdk/docs/install)
+- **Docker** (v20.10+) - [Installation Guide](https://docs.docker.com/get-docker/)
+- **Python 3.9+** with pip
+- **Snowflake account** with database access
+- **Google Cloud Project** with billing enabled
 
-3. Enable required APIs:
-   ```
-   gcloud services enable cloudbuild.googleapis.com run.googleapis.com containerregistry.googleapis.com
-   ```
+## 🔧 Installation & Deployment
 
-4. Set up Cloud Build trigger with environment variables:
-   ```
-   gcloud beta builds triggers create github \
-     --repo-name=snow-flask-whoami-gpc \
-     --branch-pattern=main \
-     --build-config=cloudbuild.yaml \
-     --substitutions=_SNOWFLAKE_USERNAME=your_username,_SNOWFLAKE_PASSWORD=your_password,_SNOWFLAKE_REGION=your_region
-   ```
+### 1. Environment Setup
+```bash
+# Authenticate with Google Cloud
+gcloud auth login
 
-5. Manually trigger a build:
-   ```
-   gcloud builds submit --config=cloudbuild.yaml .
-   ```
+# Set your project ID
+gcloud config set project YOUR_PROJECT_ID
 
-## Local Development
+# Verify configuration
+gcloud config list
+```
 
-1. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
+### 2. Clone and Prepare
+```bash
+git clone https://github.com/HatmanStack/snow-flask-whoami.git
+cd snow-flask-whoami/snow-flask-whoami-gpc/
+```
 
-2. Set environment variables:
-   ```
-   export USERNAME=your_snowflake_username
-   export PASSWORD=your_snowflake_password
-   export REGION=your_snowflake_region
-   ```
+### 3. Configure Snowflake Authentication
+```bash
+# Generate RSA key pair (if not already done)
+openssl genrsa 2048 | openssl pkcs8 -topk8 -inform PEM -out rsa_key.p8 -v2 aes-256-cbc -passout pass:your-passphrase
+openssl rsa -in rsa_key.p8 -passin pass:your-passphrase -pubout -out rsa_key.pub
 
-3. Run locally:
-   ```
-   python main.py
-   ```
+# Configure Snowflake user with public key
+# In Snowflake SQL worksheet:
+# ALTER USER your_service_user SET RSA_PUBLIC_KEY = '<public_key_content>';
+```
 
-4. Or run with Docker:
-   ```
-   docker build -t snow-flask-whoami-gpc .
-   docker run -p 8080:8080 -e PORT=8080 -e USERNAME=your_username -e PASSWORD=your_password -e REGION=your_region snow-flask-whoami-gpc
-   ```
+### 4. Enable Required APIs
+```bash
+# Enable necessary Google Cloud APIs
+gcloud services enable \
+  cloudbuild.googleapis.com \
+  run.googleapis.com \
+  containerregistry.googleapis.com \
+  logging.googleapis.com
+```
 
-## Live Demo
-The application is deployed at: https://snow-flask-whoami-gpc-k6cy6vf2la-uc.a.run.app/
+### 5. Manual Deployment
+```bash
+# Build and deploy using Cloud Build
+gcloud builds submit \
+  --config=cloudbuild.yaml \
+  --substitutions=_SNOWFLAKE_USERNAME=your_username,_SNOWFLAKE_PASSWORD=your_rsa_private_key_passphrase,_SNOWFLAKE_REGION=your_region
+```
+
+### 6. Automated CI/CD Setup
+```bash
+# Create Cloud Build trigger for automated deployments
+gcloud beta builds triggers create github \
+  --repo-name=snow-flask-whoami-gpc \
+  --repo-owner=YOUR_GITHUB_USERNAME \
+  --branch-pattern=main \
+  --build-config=cloudbuild.yaml \
+  --substitutions=_SNOWFLAKE_USERNAME=your_username,_SNOWFLAKE_PASSWORD=your_rsa_private_key_passphrase_SNOWFLAKE_REGION=your_region
+```
+
+## 💻 Local Development
+
+### Environment Setup
+```bash
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# venv\Scripts\activate   # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### Environment Variables
+```bash
+export USERNAME=your_snowflake_username
+export PASSWORD=your_rsa_private_key_passphrase
+export REGION=your_snowflake_region
+export PORT=8080
+```
+
+### Local Testing Options
+
+#### Option 1: Python Flask Server
+```bash
+python main.py
+# Access at http://localhost:8080
+```
+
+#### Option 2: Docker Container
+```bash
+# Build container
+docker build -t snow-flask-whoami-gcp .
+
+# Run container
+docker run -p 8080:8080 \
+  -e PORT=8080 \
+  -e USERNAME=your_username \
+  -e PASSWORD=your_rsa_secure_passphrase \
+  -e REGION=your_region \
+  snow-flask-whoami-gcp
+```
+
+#### Option 3: Cloud Run Emulator
+```bash
+# Install pack CLI (if not installed)
+curl -sSL "https://github.com/buildpacks/pack/releases/download/v0.27.0/pack-v0.27.0-linux.tgz" | sudo tar -C /usr/local/bin/ --no-same-owner -xzv pack
+
+# Build with Cloud Native Buildpacks
+pack build snow-flask-whoami-gcp --builder gcr.io/buildpacks/builder:v1
+
+# Run locally
+docker run -p 8080:8080 snow-flask-whoami-gcp
+```
+
+## 📊 Monitoring & Troubleshooting
+
+### Cloud Logging
+```bash
+# View recent logs
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=snow-flask-whoami-gpc" --limit 50
+
+# Stream live logs
+gcloud logging tail "resource.type=cloud_run_revision AND resource.labels.service_name=snow-flask-whoami-gpc"
+```
+
+### Cloud Run Metrics
+```bash
+# Get service details
+gcloud run services describe snow-flask-whoami-gpc --region=us-central1
+
+# List revisions
+gcloud run revisions list --service=snow-flask-whoami-gpc --region=us-central1
+```
+
+### Common Issues
+- **Cold Start Latency**: First request may take 2-3 seconds
+- **Memory Limits**: Default 1GB, increase if needed
+- **Request Timeout**: 15-minute maximum for Cloud Run
+- **Concurrency**: Default 100 concurrent requests per instance
+
+## 🗂️ Project Structure
+```
+snow-flask-whoami-gpc/
+├── main.py                # Flask application entry point
+├── Dockerfile             # Container configuration
+├── cloudbuild.yaml        # Cloud Build configuration
+├── requirements.txt       # Python dependencies
+├── rsa_key.p8            # Snowflake private key
+├── static/               # Frontend assets
+│   ├── cards.js         # 3D card interactions
+│   └── threejs-background.js # Background animations
+└── templates/            # Jinja2 HTML templates
+    ├── index.html       # Homepage with charts
+    ├── charts.html      # Data visualization page
+    ├── submit.html      # Data entry form
+    └── thanks4submit.html # Confirmation page
+```
+
+## 🔐 Security Considerations
+
+- **Snowflake Credentials**: Passed as build-time environment variables
+- **RSA Keys**: Private key encrypted with passphrase
+- **HTTPS**: Enforced by default on Cloud Run
+- **IAM**: Use least-privilege service accounts
+- **VPC**: Consider VPC Connector for private resources
+
+## 🌍 Global Deployment
+
+### Multi-Region Setup
+```bash
+# Deploy to multiple regions
+REGIONS=("us-central1" "europe-west1" "asia-northeast1")
+
+for region in "${REGIONS[@]}"; do
+  gcloud run deploy snow-flask-whoami-gpc-${region} \
+    --image gcr.io/YOUR_PROJECT_ID/snow-flask-whoami-gpc \
+    --region ${region} \
+    --platform managed \
+    --allow-unauthenticated
+done
+```
+
+### Load Balancer Configuration
+```bash
+# Create global load balancer
+gcloud compute backend-services create snow-flask-backend \
+  --global \
+  --load-balancing-scheme=EXTERNAL \
+  --protocol=HTTP
+
+# Add Cloud Run backends
+gcloud compute backend-services add-backend snow-flask-backend \
+  --global \
+  --network-endpoint-group=snow-flask-neg \
+  --network-endpoint-group-region=us-central1
+```
+
+## 💰 Cost Optimization
+
+- **Pay-per-request**: Only charged for actual requests
+- **CPU Allocation**: Choose appropriate CPU allocation
+- **Memory Optimization**: Right-size memory allocation
+- **Request Timeout**: Optimize for faster responses
+- **Free Tier**: 2M requests free monthly
+- **Estimated Monthly Cost**: <$20 for moderate usage
+
+## 🔄 Advanced CI/CD
+
+### Cloud Build Configuration (`cloudbuild.yaml`)
+```yaml
+steps:
+  # Build container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/snow-flask-whoami-gpc', '.']
+  
+  # Push to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/snow-flask-whoami-gpc']
+  
+  # Deploy to Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+    - 'run'
+    - 'deploy'
+    - 'snow-flask-whoami-gpc'
+    - '--image'
+    - 'gcr.io/$PROJECT_ID/snow-flask-whoami-gpc'
+    - '--region'
+    - 'us-central1'
+    - '--platform'
+    - 'managed'
+    - '--allow-unauthenticated'
+    - '--set-env-vars'
+    - 'USERNAME=${_SNOWFLAKE_USERNAME},PASSWORD=${_SNOWFLAKE_PASSWORD},REGION=${_SNOWFLAKE_REGION}'
+
+images:
+- 'gcr.io/$PROJECT_ID/snow-flask-whoami-gpc'
+```
+
+## 🔧 Performance Optimization
+
+### Container Optimization
+- **Multi-stage Dockerfile**: Minimize image size
+- **Python Optimization**: Use slim base images
+- **Dependency Caching**: Leverage Docker layer caching
+- **Startup Time**: Minimize cold start latency
+
+### Scaling Configuration
+```bash
+# Configure scaling parameters
+gcloud run services update snow-flask-whoami-gpc \
+  --region=us-central1 \
+  --cpu=1 \
+  --memory=2Gi \
+  --concurrency=100 \
+  --max-instances=1000 \
+  --min-instances=1
+```
