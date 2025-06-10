@@ -2,23 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Thanks</title>
+    <title>Thank You</title>
     <style>
-        body{
-          background-color: black;
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
         }
-        a{
-          text-decoration: none;
-          color:steelblue;
+        a {
+            text-decoration: none;
+            color: steelblue;
         }
-      </style>
+        .thank-you-card {
+            background-color: rgba(50, 50, 50, 0.8);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 500px;
+        }
+        .navigation {
+            margin-top: 30px;
+        }
+    </style>
 </head>
-<body><br>
-<h1 style="text-align: center;color: white;">Thanks for submitting your Info</h1><br><br><br>
-<h2 style="text-align: center;color: white;"><a href="/">HOME</a></h2>
-<br>
-<br> 
-<h2 style="text-align: center;color: white;"></h2>We're all Friends Here</h2>
 <body>
+    <div class="thank-you-card">
+        <h1>Thank You!</h1>
+        <p>Your submission has been received.</p>
+        <p>Address: <strong>{{colorname}}</strong></p>
+        <p>Name: <strong>{{username}}</strong></p>
+    </div>
     
+    <div class="navigation">
+        <a href="/">Back to Home</a> | <a href="/HardData">View All Data</a> | <a href="/Submit">Submit Another</a>
+    </div>
+</body>
 </html>

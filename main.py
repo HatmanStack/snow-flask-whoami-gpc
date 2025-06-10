@@ -1,17 +1,22 @@
-
 from flask import Flask, render_template, request
 from snowflake import connector
 import pandas as pd
 import os
+import json
 
 app = Flask(__name__)
 
 @app.route('/')
 def homepage():
     cur = cnx.cursor().execute("Select Name, count(*) from ADDRESSES group by NAME;")
-    data4charts=pd.DataFrame(cur.fetchall(), columns=['NAME','vote'])
+    data4charts = pd.DataFrame(cur.fetchall(), columns=['NAME', 'vote'])
     data4chartsJSON = data4charts.to_json(orient='records')
-    return render_template('charts.html', data4chartsJSON=data4chartsJSON)
+    
+    # Query for data to be used in the falling data stream
+    cur = cnx.cursor().execute("SELECT ADDRESS, NAME FROM ADDRESSES LIMIT 50;")
+    threejs_stream_data = json.dumps(cur.fetchall())
+    
+    return render_template('charts.html', data4chartsJSON=data4chartsJSON, threejs_stream_data=threejs_stream_data)
 
 @app.route('/Submit')
 def submitpage():
@@ -19,8 +24,10 @@ def submitpage():
 
 @app.route('/HardData')
 def hardData():
-    dfhtml = updateRows().to_html()
-    return render_template('index.html', dfhtml=dfhtml)
+    # Query the ADDRESSES table and pass the full result as JSON
+    cur = cnx.cursor().execute("SELECT ADDRESS, NAME FROM ADDRESSES")
+    interactive_table_data = json.dumps(cur.fetchall())
+    return render_template('index.html', interactive_table_data=interactive_table_data)
 
 @app.route('/thanks4submit', methods=["POST"])
 def thanks4submit():
@@ -31,17 +38,16 @@ def thanks4submit():
                            colorname=address,
                            username=name)
     
-#snowflake
+# Snowflake connection
 cnx = connector.connect(
-    account= os.environ.get('REGION'),
-    user= os.environ.get('USERNAME'),
-    password= os.environ.get('PASSWORD'),
+    account=os.environ.get('REGION'),
+    user=os.environ.get('USERNAME'),
+    password=os.environ.get('PASSWORD'),
     warehouse='COMPUTE_WH',
     database='DEMO_DB',
     schema='PUBLIC',
-    role='ACCOUNTADMIN'
+    role='python_role'
 )
-
 
 def insertRow(address, name):
     cur = cnx.cursor()
@@ -52,8 +58,11 @@ def insertRow(address, name):
 def updateRows():
     cur = cnx.cursor()
     cur.execute("SELECT * FROM ADDRESSES")
-    rows = pd.DataFrame(cur.fetchall(),columns=['ADDRESS', 'NAME'])
+    rows = pd.DataFrame(cur.fetchall(), columns=['ADDRESS', 'NAME'])
     return rows
 
-if __name__ == '__main__':
-  app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+if __name__ == "__main__":
+    # This is used when running locally. Gunicorn is used to run the
+    # application on Cloud Run. See entrypoint in Dockerfile.
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port, debug=False)

@@ -1,24 +1,87 @@
-﻿# Who Am I : GPC
+# Snowflake Flask App - Google Cloud Platform Deployment
 
-This is the GCP version of "Who Am I." It leverages Google Cloud Run to construct a microservice using Flask and Gunicorn, offering an API for querying a Snowflake Database. In contrast, the alternate versions of "Who Am I" rely on cloud providers that do not utilize containers. The key distinction lies in Google Functions overseeing the primary Flask application, which can make managing multiple paths somewhat intricate but still [achievable](https://medium.com/google-cloud/use-multiple-paths-in-cloud-functions-python-and-flask-fc6780e560d3). The data is presented using interactive Vega-Lite visualizations.
+This repository contains a Flask application that displays database information from a Snowflake database, deployed on Google Cloud Run.
 
-## Continuous Deployment
+## Enhanced Visualizations
 
-The service is built and deployed automatically using Google Cloud Build, configured in cloudbuild.yaml. Cloud Build pulls the latest code, builds the Docker container, and pushes it to Google Container Registry.
+### Homepage (/)
+The homepage features a dual-layer visualization:
+1. **Vega-Lite Chart**: A bar chart showing name counts from the Snowflake database
+2. **Three.js Background Animation**: A dynamic background with falling data sprites representing database entries. The animation creates a sense of data flow and adds visual interest to the page.
 
-The container image is then deployed to Cloud Run using a rolling update. These builds are triggered on every code commit to the main branch, enabling continuous deployment. Additional Cloud Build triggers can be configured to rebuild on other branches or schedule recurring builds.
+### HardData Page (/HardData)
+The HardData page has been completely overhauled with an interactive 3D visualization:
+1. **Interactive 3D Cards**: Each database record is represented as a 3D card in a Three.js scene
+2. **Drag Controls**: Users can click and drag cards to rearrange them in 3D space
+3. **Orbit Controls**: Users can rotate and zoom the camera to explore the data from different angles
+
+## Deployment
+
+This application is deployed on Google Cloud Platform using:
+- **Cloud Run**: Fully managed container platform
+- **Cloud Build**: CI/CD platform for building and deploying containers
+- **Container Registry**: Storage for Docker container images
+
+### Prerequisites
+- Google Cloud SDK
+- Docker
+- Python 3.9+
+- Snowflake account with proper credentials
+
+### Deployment Steps
+1. Configure your GCP credentials:
+   ```
+   gcloud auth login
+   ```
+
+2. Set your project:
+   ```
+   gcloud config set project YOUR_PROJECT_ID
+   ```
+
+3. Enable required APIs:
+   ```
+   gcloud services enable cloudbuild.googleapis.com run.googleapis.com containerregistry.googleapis.com
+   ```
+
+4. Set up Cloud Build trigger with environment variables:
+   ```
+   gcloud beta builds triggers create github \
+     --repo-name=snow-flask-whoami-gpc \
+     --branch-pattern=main \
+     --build-config=cloudbuild.yaml \
+     --substitutions=_SNOWFLAKE_USERNAME=your_username,_SNOWFLAKE_PASSWORD=your_password,_SNOWFLAKE_REGION=your_region
+   ```
+
+5. Manually trigger a build:
+   ```
+   gcloud builds submit --config=cloudbuild.yaml .
+   ```
 
 ## Local Development
 
-To run locally:
+1. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
 
-Replace `REGION`, `USERNAME`, `PASSWORD` with your own Snowflake credentials and match the Schema to the one provided.
+2. Set environment variables:
+   ```
+   export USERNAME=your_snowflake_username
+   export PASSWORD=your_snowflake_password
+   export REGION=your_snowflake_region
+   ```
 
-```
-pip install -r requirements.txt
-python main.py
-```
+3. Run locally:
+   ```
+   python main.py
+   ```
 
-Access endpoints on http://localhost:8080
+4. Or run with Docker:
+   ```
+   docker build -t snow-flask-whoami-gpc .
+   docker run -p 8080:8080 -e PORT=8080 -e USERNAME=your_username -e PASSWORD=your_password -e REGION=your_region snow-flask-whoami-gpc
+   ```
 
-The service is now built and deployed automatically on every code change using Cloud Build and Cloud Run. This enables continuous delivery of the Who Am I microservice.
+## Live Demo
+The application is deployed at: https://snow-flask-whoami-gpc-k6cy6vf2la-uc.a.run.app/
