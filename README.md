@@ -3,7 +3,7 @@
 A containerized Flask application deployed on Google Cloud Run, featuring interactive Three.js visualizations and real-time Snowflake database connectivity with automatic scaling and global edge distribution.
 
 ## 🚀 Live Application
-**URL**: https://snow-flask-whoami-gpc-k6cy6vf2la-uc.a.run.app/
+**URL**: https://snow-flask-whoami-gpc-357277717136.us-central1.run.app
 
 ## ✨ Features
 
@@ -86,7 +86,7 @@ gcloud services enable \
 # Build and deploy using Cloud Build
 gcloud builds submit \
   --config=cloudbuild.yaml \
-  --substitutions=_SNOWFLAKE_USERNAME=your_username,_SNOWFLAKE_PASSWORD=your_rsa_private_key_passphrase,_SNOWFLAKE_REGION=your_region
+  --substitutions=_LOCATION=your_gpc_artifact_registry_location,_SNOWFLAKE_USERNAME=your_username,_SNOWFLAKE_PASSWORD=your_rsa_private_key_passphrase,_SNOWFLAKE_ACCOUNT=your_account
 ```
 
 ### 6. Automated CI/CD Setup
@@ -97,7 +97,7 @@ gcloud beta builds triggers create github \
   --repo-owner=YOUR_GITHUB_USERNAME \
   --branch-pattern=main \
   --build-config=cloudbuild.yaml \
-  --substitutions=_SNOWFLAKE_USERNAME=your_username,_SNOWFLAKE_PASSWORD=your_rsa_private_key_passphrase_SNOWFLAKE_REGION=your_region
+  --substitutions=_SNOWFLAKE_USERNAME=your_username,_SNOWFLAKE_PASSWORD=your_rsa_private_key_passphrase_SNOWFLAKE_ACCOUNT=your_account
 ```
 
 ## 💻 Local Development
@@ -115,9 +115,9 @@ pip install -r requirements.txt
 
 ### Environment Variables
 ```bash
-export USERNAME=your_snowflake_username
-export PASSWORD=your_rsa_private_key_passphrase
-export REGION=your_snowflake_region
+export SNOW_USERNAME=your_snowflake_username
+export SNOW_PASSWORD=your_rsa_private_key_passphrase
+export SNOW_ACCOUNT=your_snowflake_account
 export PORT=8080
 ```
 
@@ -137,9 +137,9 @@ docker build -t snow-flask-whoami-gcp .
 # Run container
 docker run -p 8080:8080 \
   -e PORT=8080 \
-  -e USERNAME=your_username \
-  -e PASSWORD=your_rsa_secure_passphrase \
-  -e REGION=your_region \
+  -e SNOW_USERNAME=your_username \
+  -e SNOW_PASSWORD=your_rsa_secure_passphrase \
+  -e SNOW_ACCOUNT=your_account \
   snow-flask-whoami-gcp
 ```
 
@@ -273,8 +273,7 @@ steps:
     - '--platform'
     - 'managed'
     - '--allow-unauthenticated'
-    - '--set-env-vars'
-    - 'USERNAME=${_SNOWFLAKE_USERNAME},PASSWORD=${_SNOWFLAKE_PASSWORD},REGION=${_SNOWFLAKE_REGION}'
+    - '--set-env-vars=SNOW_USERNAME=${_SNOWFLAKE_USERNAME},SNOW_PASSWORD=${_SNOWFLAKE_PASSWORD},SNOW_ACCOUNT=${_SNOWFLAKE_ACCOUNT}'
 
 images:
 - 'gcr.io/$PROJECT_ID/snow-flask-whoami-gpc'
@@ -299,3 +298,7 @@ gcloud run services update snow-flask-whoami-gpc \
   --max-instances=1000 \
   --min-instances=1
 ```
+
+### Gotchas
+
+If you have a .gcloudignore file in your repository, it is used exclusively.  If you do not have a .gcloudignore file, gcloud will use your .gitignore file instead. It is extremely common for .gitignore files to contain entries like *.p8, *.pem, or *.keys to prevent developers from accidentally committing private keys to source control. 

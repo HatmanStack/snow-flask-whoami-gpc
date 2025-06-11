@@ -2,4 +2,5 @@ Flask
 gunicorn
 pandas
 snowflake-connector-python
-Werkzeug
+numpy==1.26.4
+python-dotenv

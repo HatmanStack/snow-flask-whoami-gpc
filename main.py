@@ -40,10 +40,10 @@ def thanks4submit():
     
 # Snowflake connection
 cnx = connector.connect(
-    account=os.environ.get('REGION'),
-    user=os.environ.get('USERNAME'),
+    account=os.environ.get('SNOW_ACCOUNT'),
+    user=os.environ.get('SNOW_USERNAME'),
     private_key_file='rsa_key.p8',
-    private_key_file_pwd=os.environ.get('PASSWORD'),
+    private_key_file_pwd=os.environ.get('SNOW_PASSWORD'),
     warehouse='COMPUTE_WH',
     database='DEMO_DB',
     schema='PUBLIC',

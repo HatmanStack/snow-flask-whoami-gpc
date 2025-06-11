@@ -1,11 +1,11 @@
 steps:
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/snow-flask-whoami-gpc:$COMMIT_SHA', '.']
+    args: ['build', '-t', '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/snow-flask-whoami-gpc/v1:latest', '.']
   
   # Push the container image to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/snow-flask-whoami-gpc:$COMMIT_SHA']
+    args: ['push', '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/snow-flask-whoami-gpc/v1:latest']
   
   # Deploy container image to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -14,16 +14,16 @@ steps:
       - 'run'
       - 'deploy'
       - 'snow-flask-whoami-gpc'
-      - '--image=gcr.io/$PROJECT_ID/snow-flask-whoami-gpc:$COMMIT_SHA'
+      - '--image=${_LOCATION}-docker.pkg.dev/$PROJECT_ID/snow-flask-whoami-gpc/v1:latest'
       - '--region=us-central1'
       - '--platform=managed'
       - '--allow-unauthenticated'
-      - '--set-env-vars=USERNAME=${_SNOWFLAKE_USERNAME},PASSWORD=${_SNOWFLAKE_PASSWORD},REGION=${_SNOWFLAKE_REGION}'
+      - '--set-env-vars=SNOW_USERNAME=${_SNOWFLAKE_USERNAME},SNOW_PASSWORD=${_SNOWFLAKE_PASSWORD},SNOW_ACCOUNT=${_SNOWFLAKE_ACCOUNT}'
 
 images:
-  - 'gcr.io/$PROJECT_ID/snow-flask-whoami-gpc:$COMMIT_SHA'
+  - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/snow-flask-whoami-gpc/v1:latest'
 
 substitutions:
   _SNOWFLAKE_USERNAME: ''  # Set these in Cloud Build trigger
   _SNOWFLAKE_PASSWORD: ''
-  _SNOWFLAKE_REGION: ''
+  _SNOWFLAKE_ACCOUNT: ''
