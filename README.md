@@ -36,7 +36,7 @@ A containerized Flask application deployed on Google Cloud Run, featuring intera
 
 - **Google Cloud SDK** (gcloud CLI) - [Installation Guide](https://cloud.google.com/sdk/docs/install)
 - **Docker** (v20.10+) - [Installation Guide](https://docs.docker.com/get-docker/)
-- **Python 3.9+** with pip
+- **Python 3.11+** with pip
 - **Snowflake account** with database access
 - **Google Cloud Project** with billing enabled
 
@@ -299,6 +299,5 @@ gcloud run services update snow-flask-whoami-gpc \
   --min-instances=1
 ```
 
-### Gotchas
-
+### Notes
 If you have a .gcloudignore file in your repository, it is used exclusively.  If you do not have a .gcloudignore file, gcloud will use your .gitignore file instead. It is extremely common for .gitignore files to contain entries like *.p8, *.pem, or *.keys to prevent developers from accidentally committing private keys to source control. 
