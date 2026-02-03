@@ -1,0 +1,35 @@
+# Cloud Build configuration - disabled pending trigger reconfiguration
+# Uncomment when ready to use with proper logging/service account setup
+#
+# options:
+#   logging: CLOUD_LOGGING_ONLY
+#
+# steps:
+#   # Build the container image
+#   - name: 'gcr.io/cloud-builders/docker'
+#     args: ['build', '-t', '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/snow-flask-whoami-gpc/v1:latest', '.']
+#
+#   # Push the container image to Container Registry
+#   - name: 'gcr.io/cloud-builders/docker'
+#     args: ['push', '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/snow-flask-whoami-gpc/v1:latest']
+#
+#   # Deploy container image to Cloud Run
+#   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+#     entrypoint: gcloud
+#     args:
+#       - 'run'
+#       - 'deploy'
+#       - 'snow-flask-whoami-gpc'
+#       - '--image=${_LOCATION}-docker.pkg.dev/$PROJECT_ID/snow-flask-whoami-gpc/v1:latest'
+#       - '--region=us-central1'
+#       - '--platform=managed'
+#       - '--allow-unauthenticated'
+#       - '--set-env-vars=SNOW_USERNAME=${_SNOWFLAKE_USERNAME},SNOW_PASSWORD=${_SNOWFLAKE_PASSWORD},SNOW_ACCOUNT=${_SNOWFLAKE_ACCOUNT}'
+#
+# images:
+#   - '${_LOCATION}-docker.pkg.dev/$PROJECT_ID/snow-flask-whoami-gpc/v1:latest'
+#
+# substitutions:
+#   _SNOWFLAKE_USERNAME: ''  # Set these in Cloud Build trigger
+#   _SNOWFLAKE_PASSWORD: ''
+#   _SNOWFLAKE_ACCOUNT: ''
