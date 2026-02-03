@@ -5,6 +5,8 @@ A containerized Flask application deployed on Google Cloud Run, featuring intera
 ## 🚀 Live Application
 **URL**: https://snow-flask-whoami-gpc-357277717136.us-central1.run.app
 
+** THIS REPO IS NO LONGER MAINTAINED **
+
 ## ✨ Features
 
 ### Interactive Visualizations
